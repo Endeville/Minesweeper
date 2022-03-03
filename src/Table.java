@@ -15,53 +15,69 @@ public enum Table {
     Table(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
-        this.table=new Slot[this.rows][this.cols];
+        this.table = new Slot[this.rows][this.cols];
     }
 
-    public void startGame(int row, int col){
-        this.table[row][col]=new Slot(0);
-
+    public void startGame(int row, int col) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if(i!=row || j!=col) {
-                    this.table[i][j] = ThreadLocalRandom.current().nextInt(-1, 5) == -1 ? new Slot(-1) : new Slot(0);
-                }
+                this.table[i][j] = ThreadLocalRandom.current().nextInt(-1, 5) == -1 ? new Slot(-1) : new Slot(0);
             }
         }
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                if(!this.table[i][j].isMine()){
+                if (!this.table[i][j].isMine()) {
                     fillSlot(i, j);
                 }
             }
         }
 
-        this.reveal(row,col);
+        this.started = true;
+        this.reveal(row, col);
     }
 
-    public boolean reveal(int row, int col){
+    public void reveal(int row, int col) {
 
-        if(this.table[row][col].isMine()){
-            return false;
+        if (this.table[row][col].isMine()) {
+            return;
         }
 
         this.table[row][col].reveal();
 
-        if(this.table[row][col].getMines()==0) {
-            for (int i = row - 1; i <= row + 1; i++) {
-                for (int j = col - 1; j <= col + 1; j++) {
-                    if ((i != row || j != col) && checkIndices(i, j) && !this.table[i][j].isMine()) {
-                        this.table[i][j].reveal();
-                        if (this.table[i][j].getMines() == 0) {
-                            this.reveal(i, j);
-                        }
-                    }
+        if (this.table[row][col].getMines() == 0) {
+            revealAround0(row, col);
+        }
+    }
+
+    private void revealAround0(int row, int col) {
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if (checkIndices(i, j) && !this.table[i][j].isMine() && !this.table[i][j].isRevealed()) {
+                    this.reveal(i, j);
+                }
+            }
+        }
+    }
+
+    public void restart() {
+        this.started = false;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                this.table[i][j] = new Slot(0);
+            }
+        }
+    }
+
+    public boolean checkForWin() {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if(this.table[i][j].getMines()>=0 && !this.table[i][j].isRevealed()){
+                    return false;
                 }
             }
         }
 
-        this.started=true;
         return true;
     }
 
@@ -73,21 +89,41 @@ public enum Table {
         return this.cols;
     }
 
-    public boolean isRevealed(int row, int col){
+    public boolean isRevealed(int row, int col) {
         return this.table[row][col].isRevealed();
+    }
+
+    public boolean isMine(int row, int col) {
+        return this.table[row][col].isMine();
+    }
+
+    public void flag(int row, int col) {
+        this.table[row][col].flag();
+    }
+
+    public void unflag(int row, int col) {
+        this.table[row][col].unflag();
+    }
+
+    public boolean isFlagged(int row, int col) {
+        return this.table[row][col].isFlagged();
     }
 
     public boolean isStarted() {
         return started;
     }
 
+    public int getMines(int row, int col) {
+        return this.table[row][col].getMines();
+    }
+
     private void fillSlot(int row, int col) {
 
-        var mines=0;
+        var mines = 0;
 
-        for (int i = row-1; i <=row+1 ; i++) {
-            for (int j = col-1; j <=col+1 ; j++) {
-                if((i!=row || j!=col) && checkIndices(i,j) && this.table[i][j].isMine()){
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if ((i != row || j != col) && checkIndices(i, j) && this.table[i][j].isMine()) {
                     mines++;
                 }
             }
@@ -102,10 +138,10 @@ public enum Table {
 
     @Override
     public String toString() {
-        var sb=new StringBuilder();
+        var sb = new StringBuilder();
 
         for (int i = 0; i < this.rows; i++) {
-            sb.append(Arrays.stream(this.table[i]).map(e->String.valueOf(e.getMines())).collect(Collectors.joining(" ")))
+            sb.append(Arrays.stream(this.table[i]).map(e -> String.valueOf(e.getMines())).collect(Collectors.joining(" ")))
                     .append(System.lineSeparator());
         }
 
