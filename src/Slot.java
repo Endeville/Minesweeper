@@ -11,9 +11,15 @@ public class Slot {
         this.revealed=false;
     }
 
-    public void reveal(){
+    public boolean reveal(){
+        if(this.revealed){
+            throw new IllegalStateException("This slot is already revealed!");
+        }
+
         this.flagged=false;
         this.revealed=true;
+
+        return !this.isMine;
     }
 
     public void flag(){
