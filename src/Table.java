@@ -21,7 +21,11 @@ public enum Table {
     public void startGame(int row, int col) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                this.table[i][j] = ThreadLocalRandom.current().nextInt(-1, 5) == -1 ? new Slot(-1) : new Slot(0);
+                if(i>=row-1 && i<=row+1 && j>=col-1 && j<=col+1) {
+                    this.table[i][j]=new Slot(0);
+                }else{
+                    this.table[i][j] = ThreadLocalRandom.current().nextInt(-1, 5) == -1 ? new Slot(-1) : new Slot(0);
+                }
             }
         }
 

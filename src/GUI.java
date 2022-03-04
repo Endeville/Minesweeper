@@ -13,9 +13,16 @@ public class GUI extends JFrame {
     private JPanel menu, game, gameOptions;
     private JButton[] gameSizeButtons;
     private JFrame gameFrame;
+    private ImageIcon NORMAL_CELL;
 
     public GUI() {
         super("Minesweeper");
+
+        try {
+            this.NORMAL_CELL = new ImageIcon(ImageIO.read(GUI.class.getResource("resources/normal_cell.jpg")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         JOptionPane.showMessageDialog(new JFrame("Welcome"), "Welcome to minesweeper!");
         showMenu();
@@ -80,11 +87,24 @@ public class GUI extends JFrame {
                 final var currentC=j;
 
                 this.guiTable[i][j]=new JButton();
+                this.guiTable[i][j].setIcon(NORMAL_CELL);
 
                 this.guiTable[i][j].addActionListener(e->{
                     if(!this.table.isStarted()){
                         this.table.startGame(currentR,currentC);
                     }else if(this.table.isMine(currentR, currentC)){
+                        try {
+                            this.guiTable[currentR][currentC]
+                                    .setIcon(new ImageIcon(ImageIO.read(getClass().getResource("resources/mine.png"))));
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+
+                        game.repaint();
+                        this.gameFrame.invalidate();
+                        this.gameFrame.validate();
+                        this.gameFrame.repaint();
+
                         JOptionPane.showMessageDialog(new JFrame(), "You lost! L");
                         this.gameFrame.setVisible(false);
                         this.setVisible(true);
@@ -109,9 +129,9 @@ public class GUI extends JFrame {
                     }
 
                     game.repaint();
-                    this.gameFrame.invalidate();
-                    this.gameFrame.validate();
-                    this.gameFrame.repaint();
+                    gameFrame.invalidate();
+                    gameFrame.validate();
+                    gameFrame.repaint();
 
                     if(this.table.checkForWin()){
                         JOptionPane.showMessageDialog(new JFrame(), "Congratulations!!! You won!!!");
@@ -125,7 +145,7 @@ public class GUI extends JFrame {
                 this.guiTable[i][j].addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if(e.getButton()==MouseEvent.BUTTON3){
+                        if(e.getButton()==MouseEvent.BUTTON3 && !table.isRevealed(currentR, currentC)){
                             if(table.isFlagged(currentR, currentC)){
                                 table.unflag(currentR, currentC);
                             }else{
@@ -142,6 +162,8 @@ public class GUI extends JFrame {
                                     } catch (IOException ex) {
                                         ex.printStackTrace();
                                     }
+                                }else if(!table.isFlagged(k,l) && !table.isRevealed(k,l)){
+                                    guiTable[k][l].setIcon(NORMAL_CELL);
                                 }
                             }
                         }
