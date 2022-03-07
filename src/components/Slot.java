@@ -13,15 +13,13 @@ public class Slot {
         this.revealed=false;
     }
 
-    public boolean reveal(){
+    public void reveal(){
         if(this.revealed){
             throw new IllegalStateException("This slot is already revealed!");
         }
 
         this.flagged=false;
         this.revealed=true;
-
-        return !this.isMine;
     }
 
     public void flag(){
@@ -43,10 +41,9 @@ public class Slot {
         return mines;
     }
 
-    public Slot setMines(int mines) {
+    public void setMines(int mines) {
         this.mines = mines;
         this.isMine=this.mines==-1;
-        return this;
     }
 
     public boolean isRevealed() {

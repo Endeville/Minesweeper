@@ -87,6 +87,25 @@ public enum Table {
         return true;
     }
 
+    private void fillSlot(int row, int col) {
+
+        var mines = 0;
+
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if ((i != row || j != col) && checkIndices(i, j) && this.table[i][j].isMine()) {
+                    mines++;
+                }
+            }
+        }
+
+        this.table[row][col].setMines(mines);
+    }
+
+    private boolean checkIndices(int i, int j) {
+        return i >= 0 && j >= 0 && i <= this.table.length - 1 && j <= this.table[0].length - 1;
+    }
+
     public int getRows() {
         return this.rows;
     }
@@ -121,25 +140,6 @@ public enum Table {
 
     public int getMines(int row, int col) {
         return this.table[row][col].getMines();
-    }
-
-    private void fillSlot(int row, int col) {
-
-        var mines = 0;
-
-        for (int i = row - 1; i <= row + 1; i++) {
-            for (int j = col - 1; j <= col + 1; j++) {
-                if ((i != row || j != col) && checkIndices(i, j) && this.table[i][j].isMine()) {
-                    mines++;
-                }
-            }
-        }
-
-        this.table[row][col].setMines(mines);
-    }
-
-    private boolean checkIndices(int i, int j) {
-        return i >= 0 && j >= 0 && i <= this.table.length - 1 && j <= this.table[0].length - 1;
     }
 
     @Override
