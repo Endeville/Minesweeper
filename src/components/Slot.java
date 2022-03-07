@@ -1,3 +1,5 @@
+package components;
+
 public class Slot {
     private int mines;
     private boolean revealed;

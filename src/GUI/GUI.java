@@ -1,11 +1,16 @@
+package GUI;
+
+import components.Table;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class GUI extends JFrame {
     private JButton[][] guiTable;
@@ -16,13 +21,22 @@ public class GUI extends JFrame {
     private JFrame gameFrame;
     private ImageIcon NORMAL_CELL, FLAG_CELL, MINE_CELL;
 
+    private final HashMap<Integer, ImageIcon> minesToPictures = new HashMap<>();
+
     public GUI() {
         super("Minesweeper");
+    }
 
+    public void run() {
         try {
-            this.NORMAL_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(GUI.class.getResource("resources/normal_cell.jpg"))));
-            this.FLAG_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("resources/flag.png"))));
-            this.MINE_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("resources/mine.png"))));
+            this.NORMAL_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("../resources/normal_cell.jpg"))));
+            this.FLAG_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("../resources/flag.png"))));
+            this.MINE_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("../resources/mine.png"))));
+
+            for (int i = 0; i < 9; i++) {
+                minesToPictures.put(i, new ImageIcon(ImageIO.read(Objects.requireNonNull(GUI.class.getResource("../resources/" + i + ".png")))));
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,7 +112,6 @@ public class GUI extends JFrame {
                         if ((e.getButton() == MouseEvent.BUTTON3 || e.getButton() == MouseEvent.BUTTON1)) {
                             if (e.getButton() == MouseEvent.BUTTON1) {
                                 revealCell(currentR, currentC);
-
                             } else if (e.getButton() == MouseEvent.BUTTON3 && table.isStarted() && !table.isRevealed(currentR, currentC)) {
                                 flagCell(currentR, currentC);
                             }
@@ -140,7 +153,7 @@ public class GUI extends JFrame {
 
             for (int i = 0; i < guiTable.length; i++) {
                 for (int j = 0; j < guiTable[0].length; j++) {
-                    if(table.isMine(i,j)){
+                    if (table.isMine(i, j)) {
                         guiTable[i][j].setIcon(MINE_CELL);
                     }
                 }
@@ -174,12 +187,8 @@ public class GUI extends JFrame {
         for (int k = 0; k < guiTable.length; k++) {
             for (int l = 0; l < guiTable[0].length; l++) {
                 if (table.isRevealed(k, l)) {
-                    try {
-                        guiTable[k][l]
-                                .setIcon(new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("resources/" + table.getMines(k, l) + ".png")))));
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
+                    guiTable[k][l]
+                            .setIcon(minesToPictures.get(table.getMines(k, l)));
 
                     guiTable[k][l].setEnabled(false);
 

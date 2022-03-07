@@ -1,3 +1,5 @@
+package components;
+
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
