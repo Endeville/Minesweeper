@@ -7,13 +7,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
 public class GUI extends JFrame {
+//    Uses JButton matrix for swing representation that would be visible for the end-user
     private JButton[][] guiTable;
+//    Uses Table for class representation for the game board and its underlying logic
     private Table table;
 
     private JPanel menu, game, gameOptions;
@@ -27,6 +29,7 @@ public class GUI extends JFrame {
         super("Minesweeper");
     }
 
+//    The place where the application starts. It's main function is to get the resources
     public void run() {
         try {
             this.NORMAL_CELL = new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource("../resources/normal_cell.jpg"))));
@@ -45,6 +48,8 @@ public class GUI extends JFrame {
         showMenu();
     }
 
+
+//    The game menu interface elements
     private void showMenu() {
         menu = new JPanel();
         menu.setLayout(new GridBagLayout());
@@ -92,6 +97,7 @@ public class GUI extends JFrame {
         this.setVisible(true);
     }
 
+//    After choosing the game type, this method shows the
     private void showGame() {
         this.gameFrame = new JFrame("Minesweeper");
 
@@ -121,7 +127,21 @@ public class GUI extends JFrame {
                                 refreshFrame(gameFrame);
 
                                 if (table.checkForWin()) {
-                                    JOptionPane.showMessageDialog(new JFrame(), "Congratulations!!! You won!!!");
+                                    var time=System.currentTimeMillis();
+                                    var minutes=(time-table.getTimeStarted())/60000;
+                                    var seconds=(time-table.getTimeStarted()-minutes*60000)/1000;
+
+                                    JOptionPane.showMessageDialog(new JFrame(),
+                                            String.format("Congratulations!!! You won!!!%nYou finished in: %s : %s",minutes, seconds<10 ? "0"+seconds: seconds));
+
+                                    try {
+                                        var fw=new FileWriter("src/data.txt", true);
+                                        fw.write(String.format("Game(%dx%d) finished in: %s : %s%n",
+                                                table.getRows(), table.getCols(), minutes, seconds<10 ? "0"+seconds: seconds));
+                                        fw.close();
+                                    } catch (IOException ex) {
+                                        ex.printStackTrace();
+                                    }
                                     gameFrame.setVisible(false);
                                     setVisible(true);
                                     table.restart();
@@ -145,6 +165,7 @@ public class GUI extends JFrame {
         gameFrame.setVisible(true);
     }
 
+//    Reveals a cell at the click of a button. Checks whether it is a mine and acts accordingly
     private void revealCell(int currentR, int currentC) {
         if (!table.isStarted()) {
             table.startGame(currentR, currentC);
@@ -159,7 +180,21 @@ public class GUI extends JFrame {
                 }
             }
 
-            JOptionPane.showMessageDialog(new JFrame(), "You lost! L");
+
+            var time=System.currentTimeMillis();
+            var minutes=(time-table.getTimeStarted())/60000;
+            var seconds=(time-table.getTimeStarted()-minutes*60000)/1000;
+
+            JOptionPane.showMessageDialog(new JFrame(), String.format("You lost! Take the L XD%n You failed in:%s : %s",minutes, seconds<10 ? "0"+seconds: seconds));
+
+            try {
+                var fw=new FileWriter("src/data.txt", true);
+                fw.write(String.format("Game(%dx%d) failed in: %s : %s%n",
+                        table.getRows(), table.getCols(), minutes, seconds<10 ? "0"+seconds: seconds));
+                fw.close();
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
             gameFrame.setVisible(false);
             setVisible(true);
             table.restart();
@@ -169,6 +204,7 @@ public class GUI extends JFrame {
         }
     }
 
+//    Flags a cell when the right mouse button is clicked on it
     private void flagCell(int currentR, int currentC) {
         if (table.isFlagged(currentR, currentC)) {
             table.unflag(currentR, currentC);
@@ -177,12 +213,14 @@ public class GUI extends JFrame {
         }
     }
 
+//    refreshes the frame and therefore - the gui
     private void refreshFrame(JFrame frame) {
         frame.invalidate();
         frame.validate();
         frame.repaint();
     }
 
+//    Adjusts the gui table based on the changes made
     private void refreshTable() {
         for (int k = 0; k < guiTable.length; k++) {
             for (int l = 0; l < guiTable[0].length; l++) {

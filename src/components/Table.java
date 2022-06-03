@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+//Class representation of the minesweeper board
+
 public enum Table {
     SMALL(8, 8),
     MEDIUM(16, 16),
@@ -13,13 +15,17 @@ public enum Table {
     private final int rows;
     private final int cols;
     private boolean started;
+    private long timeStarted;
 
     Table(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
         this.table = new Slot[this.rows][this.cols];
+        this.timeStarted=0;
     }
 
+
+    //Starts the game(initializes the board) by using a pseudo random algorithm to choose the mine cells
     public void startGame(int row, int col) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -41,8 +47,10 @@ public enum Table {
 
         this.started = true;
         this.reveal(row, col);
+        this.timeStarted=System.currentTimeMillis();
     }
 
+//    Reveals a cell on the board
     public void reveal(int row, int col) {
 
         if (this.table[row][col].isMine()) {
@@ -56,6 +64,7 @@ public enum Table {
         }
     }
 
+//    If a cell has zero mines around it, its reveal automatically reveals the ones around it. That's what this method does
     private void revealAround0(int row, int col) {
         for (int i = row - 1; i <= row + 1; i++) {
             for (int j = col - 1; j <= col + 1; j++) {
@@ -66,6 +75,7 @@ public enum Table {
         }
     }
 
+//    Resets the board so that a new game could be started without restarting the whole application
     public void restart() {
         this.started = false;
         for (int i = 0; i < rows; i++) {
@@ -75,6 +85,7 @@ public enum Table {
         }
     }
 
+//    Checks whether the player has won the game i.e. all the cell NOT containing a mine are revealed
     public boolean checkForWin() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -87,6 +98,7 @@ public enum Table {
         return true;
     }
 
+//    Sets the mines count of the cell(scans the surrounding slots for mines)
     private void fillSlot(int row, int col) {
 
         var mines = 0;
@@ -102,9 +114,12 @@ public enum Table {
         this.table[row][col].setMines(mines);
     }
 
+//    Checks whether an index is valid given the table dimensions
     private boolean checkIndices(int i, int j) {
         return i >= 0 && j >= 0 && i <= this.table.length - 1 && j <= this.table[0].length - 1;
     }
+
+//    Trivial methods(getters, setters, toString etc.)
 
     public int getRows() {
         return this.rows;
@@ -140,6 +155,15 @@ public enum Table {
 
     public int getMines(int row, int col) {
         return this.table[row][col].getMines();
+    }
+
+    public long getTimeStarted() {
+        return timeStarted;
+    }
+
+    public Table setTimeStarted(long timeStarted) {
+        this.timeStarted = timeStarted;
+        return this;
     }
 
     @Override
